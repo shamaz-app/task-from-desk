@@ -15,7 +15,7 @@ public class ScheduleTest {
     public static void main(String agrs[]) {
 //        final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
         ExecutorService executor = Executors.newFixedThreadPool(4);
-        List<Boolean> result = null;
+        List<Boolean> result;
 
         try {
             List<String> list = new ArrayList<String>() {{
@@ -34,6 +34,7 @@ public class ScheduleTest {
             for (String item : list) {
                 futures.add(CompletableFuture.supplyAsync(() -> func.apply(item), executor));
             }
+            executor.shutdown();
 
             ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
             scheduler.schedule(new Task(futures), 5, TimeUnit.SECONDS);
@@ -51,7 +52,7 @@ public class ScheduleTest {
             log.info("Exception last !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ......");
             executor.shutdownNow();
         } finally {
-            executor.shutdown();
+            executor.shutdownNow();
         }
 
     }
