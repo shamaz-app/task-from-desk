@@ -1,18 +1,46 @@
 package org.taskFromDesk.schedulerTest;
 
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
+@Slf4j
 public class Task implements Runnable {
 
-    private final ExecutorService executor;
+    private  ExecutorService executor;
+    private boolean done;
+    List<CompletableFuture<Boolean>> futures;
 
     public Task(ExecutorService executor) {
         this.executor = executor;
     }
 
+    public Task(List<CompletableFuture<Boolean>> futures) {
+        this.futures = futures;
+
+    }
+
     @Override
     public void run() {
-        executor.shutdownNow();
-        System.out.println("Executor was shutdown!");
+
+            futures.forEach(it -> {
+                try {
+                    it.complete(false);
+                } catch (Exception e) {
+                    log.warn("task [{}] cancelled with error ", it, e);
+                }
+            });
+
+
+//        if (!executor.isTerminated()) {
+//            executor.shutdownNow();
+//
+//        } else {
+//            System.out.println("Executor already terminated!");
+//        }
+//        System.out.println("Executor was shutdown!");
     }
 }
