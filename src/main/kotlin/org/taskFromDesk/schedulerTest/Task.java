@@ -43,4 +43,8 @@ public class Task implements Runnable {
 //        }
 //        System.out.println("Executor was shutdown!");
     }
+
+    public void cancel(){
+        futures.forEach(it -> it.cancel(true));
+    }
 }
