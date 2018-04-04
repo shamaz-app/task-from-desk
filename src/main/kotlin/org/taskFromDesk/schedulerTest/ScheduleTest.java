@@ -16,6 +16,7 @@ public class ScheduleTest {
 //        final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
         ExecutorService executor = Executors.newFixedThreadPool(4);
         List<Boolean> result;
+        ScheduledExecutorService scheduler = null;
 
         try {
             List<String> list = new ArrayList<String>() {{
@@ -28,7 +29,6 @@ public class ScheduleTest {
             Function<String, Boolean> func = scheduleTest::run;
 
 
-
             List<CompletableFuture<Boolean>> futures = new ArrayList<>();
 
             for (String item : list) {
@@ -36,8 +36,9 @@ public class ScheduleTest {
             }
             executor.shutdown();
 
-            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-            scheduler.schedule(new Task(futures), 5, TimeUnit.SECONDS);
+            scheduler = Executors.newSingleThreadScheduledExecutor();
+            Task currentTask = new Task(futures);
+            scheduler.schedule(currentTask, 5, TimeUnit.SECONDS);
             scheduler.shutdown();
 
             CompletableFuture<Void> done = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
@@ -48,6 +49,7 @@ public class ScheduleTest {
             result = gtFuture.join();
             log.debug("R 2 [{}] {} {} {}", done, allDone, gtFuture, result);
 
+//            cancelTask(currentTask);
         } catch (CancellationException e) {
             log.info("Exception last !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ......");
             executor.shutdownNow();
@@ -55,6 +57,10 @@ public class ScheduleTest {
             executor.shutdownNow();
         }
 
+    }
+
+    private static void cancelTask(Task task){
+        task.cancel();
     }
 
     public boolean run(String task) {
